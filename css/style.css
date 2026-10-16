@@ -460,6 +460,12 @@ h1, h2, h3 { font-weight: 500; margin: 0; letter-spacing: 0.04em; }
 }
 .submit-status.is-ok { color: var(--jade); }
 .submit-status.is-err { color: var(--seal); }
+.submit-status .retry-upload {
+  margin-left: 10px;
+  vertical-align: middle;
+  color: var(--seal);
+  border-color: var(--seal);
+}
 
 .result-actions { display: flex; justify-content: center; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
 

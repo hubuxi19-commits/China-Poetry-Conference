@@ -33,25 +33,42 @@ function normalize(row) {
   };
 }
 
+// 把失败原因翻译成一句人话，显示在成绩页上，便于用户/维护者定位。
+// kind = "network" 表示请求根本没到服务器（值得重试）；kind = "http" 表示服务器明确拒绝。
+function fail(kind, reason) {
+  const e = new Error(reason);
+  e.kind = kind;
+  e.reason = reason;
+  return e;
+}
+
 const SupabaseAdapter = {
   async submitScore(payload) {
-    const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/scores`, {
-      method: "POST",
-      headers: supabaseHeaders({ Prefer: "return=minimal" }),
-      body: JSON.stringify({
-        nickname: payload.nickname,
-        fingerprint: payload.fingerprint,
-        correct_count: payload.correctCount,
-        total_questions: payload.totalQuestions,
-        duration_ms: payload.durationMs,
-      }),
-    });
+    let res;
+    try {
+      res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/scores`, {
+        method: "POST",
+        headers: supabaseHeaders({ Prefer: "return=minimal" }),
+        body: JSON.stringify({
+          nickname: payload.nickname,
+          fingerprint: payload.fingerprint,
+          correct_count: payload.correctCount,
+          total_questions: payload.totalQuestions,
+          duration_ms: payload.durationMs,
+        }),
+      });
+    } catch {
+      // fetch 抛错 = 断网 / DNS 失败 / 请求被拦截，服务器没收到
+      throw fail("network", "网络未连通");
+    }
 
     // 409 = 指纹唯一约束冲突，说明这个浏览器已经答过
     if (res.status === 409) return { ok: false, duplicate: true };
     if (!res.ok) {
-      const detail = await res.text();
-      throw new Error(`提交成绩失败（${res.status}）：${detail}`);
+      if (res.status === 401 || res.status === 403) {
+        throw fail("http", "服务器拒绝（密钥或权限策略）");
+      }
+      throw fail("http", `服务器返回 ${res.status}`);
     }
     return { ok: true, duplicate: false };
   },

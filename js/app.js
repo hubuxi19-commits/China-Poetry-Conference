@@ -302,32 +302,74 @@ function renderReview() {
   });
 }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * 提交成绩，失败时自动重试。
+ * 只对「请求根本没到服务器」的网络错误重试——服务器明确拒绝（如密钥错误）
+ * 重试也没用。国内访问 *.supabase.co 偶有波动，一次成功一次的抖动很常见，
+ * 所以给足重试机会，避免用户因为一次抖动就丢成绩。
+ */
+async function trySubmit(payload) {
+  const MAX = 3;
+  let reason = "未知错误";
+  for (let attempt = 0; attempt < MAX; attempt++) {
+    try {
+      const res = await api.submitScore(payload);
+      if (res.duplicate) return { duplicate: true };
+      return { ok: true };
+    } catch (e) {
+      console.error(e);
+      reason = e.reason || e.message || "未知错误";
+      if (e.kind !== "network") break; // 服务器拒绝，重试无意义
+      if (attempt < MAX - 1) await sleep(600 * (attempt + 1));
+    }
+  }
+  return { reason };
+}
+
+function renderSubmitStatus(record, outcome) {
+  const st = $("submit-status");
+  st.innerHTML = "";
+
+  if (outcome.ok) {
+    st.className = "submit-status is-ok";
+    st.textContent = IS_LOCAL_MODE ? "成绩已记录（本地模式）。" : "成绩已上传，感谢参与。";
+    return;
+  }
+  if (outcome.duplicate) {
+    st.className = "submit-status is-err";
+    st.textContent = "这个浏览器已经提交过成绩，不再重复计入。";
+    return;
+  }
+
+  // 失败：说明原因，并给一个手动重试入口，让成绩还能补交上去
+  st.className = "submit-status is-err";
+  const p = document.createElement("span");
+  p.textContent = `成绩上传失败（${outcome.reason}），已保留在本机。`;
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "btn btn-mini retry-upload";
+  btn.textContent = "重试上传";
+  btn.addEventListener("click", () => submitScore(record));
+  st.appendChild(p);
+  st.appendChild(btn);
+}
+
 async function submitScore(record) {
   const st = $("submit-status");
   st.className = "submit-status";
   st.textContent = "正在提交成绩…";
 
-  try {
-    const res = await api.submitScore({
-      nickname: record.nickname,
-      fingerprint: getFingerprint(),
-      correctCount: record.correctCount,
-      totalQuestions: record.totalQuestions,
-      durationMs: record.durationMs,
-    });
+  const outcome = await trySubmit({
+    nickname: record.nickname,
+    fingerprint: getFingerprint(),
+    correctCount: record.correctCount,
+    totalQuestions: record.totalQuestions,
+    durationMs: record.durationMs,
+  });
 
-    if (res.duplicate) {
-      st.className = "submit-status is-err";
-      st.textContent = "这个浏览器已经提交过成绩，不再重复计入。";
-    } else {
-      st.className = "submit-status is-ok";
-      st.textContent = IS_LOCAL_MODE ? "成绩已记录（本地模式）。" : "成绩已上传，感谢参与。";
-    }
-  } catch (e) {
-    st.className = "submit-status is-err";
-    st.textContent = "成绩上传失败，已保留在本机。";
-    console.error(e);
-  }
+  renderSubmitStatus(record, outcome);
 
   try {
     const { rank } = await api.fetchMyRank(getFingerprint());
