@@ -350,7 +350,7 @@ function renderSubmitStatus(record, outcome) {
   }
   if (outcome.duplicate) {
     st.className = "submit-status is-err";
-    st.textContent = "这个浏览器已经提交过成绩，不再重复计入。";
+    st.textContent = "你已经提交过成绩，不再重复计入。";
     return;
   }
 
@@ -463,7 +463,8 @@ function init() {
   $("home-title").textContent = CONFIG.TITLE;
   $("home-subtitle").textContent = CONFIG.SUBTITLE;
   $("home-motto").textContent = CONFIG.MOTTO;
-  $("home-seal").textContent = CONFIG.TITLE[1] || CONFIG.TITLE[0] || "诗";
+  // 印章取标题里的「诗」字最应景；标题不含「诗」时退回首字
+  $("home-seal").textContent = CONFIG.TITLE.includes("诗") ? "诗" : CONFIG.TITLE[0] || "诗";
   $("site-footer").textContent = `${CONFIG.SUBTITLE} 出品 · ${CONFIG.TITLE}`;
 
   $("mode-hint").textContent = IS_LOCAL_MODE

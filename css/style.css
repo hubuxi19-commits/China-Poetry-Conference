@@ -1,5 +1,5 @@
 /* ============================================================
-   古诗词大会 · 水墨古风样式
+   趣味诗词竞赛 · 水墨古风样式
    配色：宣纸白 #f5f1e8 / 墨黑 #2b2b2b / 朱砂 #b3402e / 竹青 #3f7a55
    ============================================================ */
 
@@ -123,7 +123,7 @@ h1, h2, h3 { font-weight: 500; margin: 0; letter-spacing: 0.04em; }
 .brand { text-align: center; margin-top: clamp(8px, 4vh, 40px); }
 
 .title {
-  font-size: clamp(2.3rem, 12vw, 3.4rem);
+  font-size: clamp(2rem, 11vw, 3.4rem);
   letter-spacing: 0.22em;
   text-indent: 0.22em;
   color: var(--ink);

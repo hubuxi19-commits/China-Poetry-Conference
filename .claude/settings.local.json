@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp app.js /tmp/_a.mjs)",
+      "Bash(node --check /tmp/_a.mjs)",
+      "Bash(rm -f /tmp/_a.mjs cd /tmp)",
+      "Bash(agent-browser eval *)"
+    ]
+  }
+}
