@@ -8,5 +8,8 @@ dist/
 .DS_Store
 Thumbs.db
 
+# 本地工具配置
+.claude/
+
 # 日志
 *.log
