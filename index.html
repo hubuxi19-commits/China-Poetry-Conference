@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f5f1e8" />
+  <meta name="description" content="国学社 · 古文化协会 联合出品，从题库随机抽题作答，看看你对古诗词的了解有多深。" />
+  <title>古诗词大会</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="paper-grain" aria-hidden="true"></div>
+
+  <main class="stage">
+
+    <!-- ——————————— 首页 ——————————— -->
+    <section id="view-home" class="view is-active">
+      <div class="brand">
+        <div class="ornament"><span>◇</span><i></i><span>◇</span></div>
+        <h1 class="title" id="home-title">古诗词大会</h1>
+        <div class="seal-row"><span class="seal" id="home-seal">诗</span></div>
+      </div>
+
+      <p class="motto" id="home-motto">海内存知己，天涯若比邻。</p>
+      <p class="subtitle" id="home-subtitle">国学社 · 古文化协会</p>
+
+      <div class="card rules">
+        <h2 class="card-title">玩法说明</h2>
+        <ul>
+          <li>从 50 道题库中随机抽取 10 道</li>
+          <li>答完一道立即判定，并给出正确答案</li>
+          <li>最后按得分排名，同分者用时短者靠前</li>
+          <li>每个浏览器只能作答一次</li>
+        </ul>
+      </div>
+
+      <div class="card entry" id="entry-panel"><!-- 由 app.js 填充 --></div>
+
+      <div class="home-actions">
+        <button id="btn-leaderboard" class="btn btn-ghost">查看排行榜</button>
+      </div>
+
+      <p class="mode-hint" id="mode-hint"></p>
+    </section>
+
+    <!-- ——————————— 答题 ——————————— -->
+    <section id="view-quiz" class="view">
+      <header class="quiz-bar">
+        <span class="quiz-progress">
+          第 <b id="q-index">1</b> / <b id="q-total">10</b> 题
+        </span>
+        <span class="quiz-score">已答对 <b id="q-score">0</b> 题</span>
+        <span class="quiz-timer" id="q-timer">00:00</span>
+      </header>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+
+      <div class="card question-card" id="question-card">
+        <p class="question-text" id="question-text"></p>
+        <div class="options" id="options"></div>
+      </div>
+
+      <div class="quiz-actions">
+        <button id="btn-next" class="btn hidden">下一题</button>
+      </div>
+    </section>
+
+    <!-- ——————————— 成绩 ——————————— -->
+    <section id="view-result" class="view">
+      <div class="card result-card">
+        <p class="result-eyebrow">答题完成</p>
+        <div class="big-score">
+          <span id="result-score">0</span><small>/ <span id="result-total">10</span></small>
+        </div>
+        <p class="result-grade" id="result-grade"></p>
+
+        <div class="result-meta">
+          <div class="meta-item">
+            <span class="meta-label">用时</span>
+            <span class="meta-value" id="result-time">00:00</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">名次</span>
+            <span class="meta-value" id="result-rank">—</span>
+          </div>
+        </div>
+
+        <p class="submit-status" id="submit-status"></p>
+
+        <div class="result-actions">
+          <button id="btn-view-board" class="btn">查看排行榜</button>
+        </div>
+      </div>
+
+      <div class="card review">
+        <h2 class="card-title">答题回顾</h2>
+        <div id="review-list" class="review-list"></div>
+      </div>
+    </section>
+
+    <!-- ——————————— 排行榜 ——————————— -->
+    <section id="view-leaderboard" class="view">
+      <div class="board-head">
+        <h2 class="board-title">排行榜</h2>
+        <button id="btn-refresh" class="btn btn-mini">刷新</button>
+      </div>
+      <p class="board-note">分数优先，同分比时间</p>
+
+      <div class="card board-card">
+        <table class="board">
+          <thead>
+            <tr><th class="col-rank">名次</th><th class="col-name">昵称</th><th class="col-score">得分</th><th class="col-time">用时</th></tr>
+          </thead>
+          <tbody id="board-body"></tbody>
+        </table>
+        <p class="board-empty hidden" id="board-empty">还没有人作答，快来抢第一名。</p>
+        <p class="board-loading" id="board-loading">正在读取…</p>
+      </div>
+
+      <div class="home-actions">
+        <button id="btn-back-home" class="btn btn-ghost">返回首页</button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
