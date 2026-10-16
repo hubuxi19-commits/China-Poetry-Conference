@@ -75,6 +75,33 @@ export function markPlayed(record) {
   safeSet(KEY_DONE, JSON.stringify(record));
 }
 
+// ——— 待补交队列 ———
+// 上传失败的成绩存这里，等网络恢复（重新打开页面 / 联网事件）自动重试。
+// 海外后端在部分国内网络下会连不上，用户不该因此丢成绩。
+const KEY_PENDING = "gsq_pending";
+
+export function getPending() {
+  const raw = safeGet(KEY_PENDING);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+export function setPending(record) {
+  safeSet(KEY_PENDING, JSON.stringify(record));
+}
+
+export function clearPending() {
+  try {
+    localStorage.removeItem(KEY_PENDING);
+  } catch {
+    delete mem[KEY_PENDING];
+  }
+}
+
 /** 清除本地作答标记（仅用于测试，界面不提供入口） */
 export function clearPlayed() {
   try {

@@ -235,6 +235,7 @@ h1, h2, h3 { font-weight: 500; margin: 0; letter-spacing: 0.04em; }
 }
 .done-note .done-score small { font-size: 0.42em; color: var(--ink-faint); }
 .done-note p { margin: 8px 0 0; color: var(--ink-soft); font-size: 0.95em; }
+.pending-hint { color: var(--seal) !important; font-size: 0.86em !important; }
 
 .home-actions { display: flex; justify-content: center; margin-top: 4px; }
 

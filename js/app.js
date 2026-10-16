@@ -4,7 +4,15 @@
 
 import { CONFIG } from "./config.js";
 import { QUESTIONS } from "./questions.js";
-import { getFingerprint, hasPlayed, getMyRecord, markPlayed } from "./storage.js";
+import {
+  getFingerprint,
+  hasPlayed,
+  getMyRecord,
+  markPlayed,
+  getPending,
+  setPending,
+  clearPending,
+} from "./storage.js";
 import { api, IS_LOCAL_MODE } from "./api.js";
 
 const $ = (id) => document.getElementById(id);
@@ -89,6 +97,9 @@ function renderHome() {
       <div class="done-score">${rec.correctCount}<small> / ${rec.totalQuestions}</small></div>
       <p>你已作答过，用时 ${formatMs(rec.durationMs)}。</p>
       <p>${escapeHtml(rec.nickname)}，谢谢参与。</p>`;
+    if (getPending()) {
+      panel.innerHTML += `<p class="pending-hint">这次成绩还没上传成功，联网后会自动补交。</p>`;
+    }
     return;
   }
 
@@ -356,26 +367,48 @@ function renderSubmitStatus(record, outcome) {
   st.appendChild(btn);
 }
 
-async function submitScore(record) {
-  const st = $("submit-status");
-  st.className = "submit-status";
-  st.textContent = "正在提交成绩…";
-
-  const outcome = await trySubmit({
+function payloadOf(record) {
+  return {
     nickname: record.nickname,
     fingerprint: getFingerprint(),
     correctCount: record.correctCount,
     totalQuestions: record.totalQuestions,
     durationMs: record.durationMs,
-  });
+  };
+}
 
-  renderSubmitStatus(record, outcome);
-
+async function refreshRank() {
   try {
     const { rank } = await api.fetchMyRank(getFingerprint());
     $("result-rank").textContent = rank ? `第 ${rank} 名` : "—";
   } catch (e) {
     console.error(e);
+  }
+}
+
+async function submitScore(record) {
+  const st = $("submit-status");
+  st.className = "submit-status";
+  st.textContent = "正在提交成绩…";
+
+  const outcome = await trySubmit(payloadOf(record));
+
+  // 成功或"已提交过"都算落地了，撤掉待补交；只有真失败才留着等重试
+  if (outcome.ok || outcome.duplicate) clearPending();
+  else setPending(record);
+
+  renderSubmitStatus(record, outcome);
+  await refreshRank();
+}
+
+/** 把上次没交上去的成绩补交一次。页面打开时、以及网络恢复时都会跑一遍。 */
+async function flushPending() {
+  const record = getPending();
+  if (!record) return;
+  const outcome = await trySubmit(payloadOf(record));
+  if (outcome.ok || outcome.duplicate) {
+    clearPending();
+    renderHome();
   }
 }
 
@@ -447,6 +480,10 @@ function init() {
   });
 
   renderHome();
+
+  // 上次没交上去的成绩，打开页面时补一次；断网重连时再补一次
+  flushPending();
+  window.addEventListener("online", flushPending);
 }
 
 // 题库数量不足时给出明确提示，而不是静默出题异常
